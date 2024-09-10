@@ -5,6 +5,9 @@ import Header from "@/components/Header";
 import Search from "@/components/Search";
 import Filtering from "@/components/Filtering";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { link } from "fs";
 export default function Home() {
   let sections = ["Diabetes", "Colesterol", "Presion"];
   const [selectedSection, setSelectedSection] = useState("");
@@ -44,6 +47,62 @@ export default function Home() {
     {
       name: "Daplagliflozina",
       link: "/medicina.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Empagliflozina",
+      link: "/emplaglifozina.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Irbesartan",
+      link: "/irbersartan.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Colageno",
+      link: "/colageno.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Celecoxib",
+      link: "/celecoxib.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Gilano g",
+      link: "/gilanog-f20.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Citidin",
+      link: "/citidin5.jpg",
+      price1: 15.99,
+      price2: 12.99,
+      price3: 2.88,
+      sections: "presion",
+    },
+    {
+      name: "Norflex",
+      link: "/norflex.jpg",
       price1: 15.99,
       price2: 12.99,
       price3: 2.88,
@@ -140,6 +199,14 @@ export default function Home() {
         onSectionChange={handleSectionChange}
       />
       <Search />
+      <div>
+        <Link href={"/dashboard"}>
+          <Button className="bg-blue-500">Colocar producto</Button>
+        </Link>
+        <Link href={"/about"}>
+          <Button className="bg-green-600">Conócenos</Button>
+        </Link>
+      </div>
       <ComparisonList items={items} />
     </div>
   );

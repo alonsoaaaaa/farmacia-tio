@@ -64,7 +64,7 @@ const Filtering = ({ sections, selectedSection, onSectionChange }: any) => {
         </Link>
         <Link
           className="flex flex-col items-center"
-          href={"https://wa.me/c/55 9046 7787 "}
+          href={"https://wa.me/c/5590467787"}
         >
           <Image
             src="/whatsapp.svg"
