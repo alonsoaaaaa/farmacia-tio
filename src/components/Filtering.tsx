@@ -15,7 +15,7 @@ const Filtering = ({ sections, selectedSection, onSectionChange }: any) => {
     <div className="flex flex-col sm:flex-row items-center justify-between p-2">
       <div className="flex flex-col sm:flex-row items-center mb-2 sm:mb-0">
         <h1 className="mb-1 sm:mb-0 sm:mr-2">Selecciona una sección...</h1>
-        <Select value={selectedSection} onValueChange={onSectionChange}>
+        {/* <Select value={selectedSection} onValueChange={onSectionChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
@@ -27,7 +27,7 @@ const Filtering = ({ sections, selectedSection, onSectionChange }: any) => {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
       <div className="flex justify-center space-x-4">
         <a href="tel:+5971154005" className="flex flex-col items-center">
