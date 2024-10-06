@@ -14,7 +14,7 @@ import Link from "next/link";
 const PriceComparisonList = ({ items }: any) => {
   const calculateDifference = (price1: any, price2: any) => {
     const diff = price1 - price2;
-    return diff > 0 ? `+$${diff.toFixed(2)}` : `-$${Math.abs(diff).toFixed(2)}`;
+    return diff > 0 ? `+$${diff}` : `-$${Math.abs(diff)}`;
   };
   return (
     <div className="overflow-x-auto">
@@ -55,7 +55,7 @@ const PriceComparisonList = ({ items }: any) => {
               <TableCell>
                 <div className="flex flex-col items-center sm:flex-row">
                   <Image
-                    src={item.link}
+                    src={item.imageUrl}
                     width={100}
                     height={150}
                     className="rounded-md mb-2 sm:mb-0 sm:mr-2"
@@ -67,17 +67,17 @@ const PriceComparisonList = ({ items }: any) => {
                 </div>
               </TableCell>
               <TableCell className="font-bold underline">
-                ${item.price1.toFixed(2)}
+                ${item.price}
               </TableCell>
               <TableCell className="font-bold underline">
-                ${item.price2.toFixed(2)}
+                ${item.price2}
               </TableCell>
               <TableCell className="font-bold underline">
-                ${item.price3.toFixed(2)}
+                ${item.price3}
               </TableCell>
               <TableCell className="flex flex-col font-bold">
                 <Badge className="w-fit bg-green-500">
-                  {calculateDifference(item.price1, item.price2)}
+                  {calculateDifference(item.price, item.price2)}
                 </Badge>
                 <Link href={""} className="text-blue-500 underline">
                   Comprar

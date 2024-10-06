@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,71 +31,66 @@ function Dashboard() {
     formState: { errors },
     reset,
   } = useForm();
-  const [displayImages, setDisplayImages] = useState<File[]>([]);
-  const [imagesNames, setImagesNames] = useState<{ name: string }[]>([]);
-  const [imageURLS, setImageURLS] = useState<string[]>([]);
-  const [submittingImg, setSubmittingImg] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
-  const insuranceRef = useRef(null);
-  const [isClient, setIsClient] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const createImageUrl = async (image: File): Promise<string> => {
-    // Implement this function to create and return an image URL
-    // This is a placeholder implementation
-    return URL.createObjectURL(image);
-  };
-
-  const handleImageSubmit = async (image: File) => {
-    try {
-      console.log("Imagen recibida en el handleImageSubmit: ", image);
-      let url = await createImageUrl(image);
-      setImagesNames((prev) => [...prev, { name: image.name }]);
-      setSubmittingImg(false);
-      console.log("imagesNames: ", imagesNames);
-      setImageURLS((prev) => [...prev, url]);
-      setImageError(null);
-    } catch (error) {
-      setImageError("Error al subir la imagen");
-    }
-  };
-
   const onSubmit = async (data: any) => {
+    if (!image) {
+      setError("Please upload an image");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
     try {
-      if (imagesNames.length === 0) {
-        setImageError("Necesitas subir al menos una imágen");
-        return;
-      }
-      data.image = imageURLS;
-      data.features = data.features.split(",");
-      const res = await fetch(`/api/availablecars`, {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("make", data.make);
+      formData.append("description", data.description || "");
+      formData.append("price", data.price);
+      formData.append("price2", data.price2);
+      formData.append("price3", data.price3);
+      formData.append("stock", data.stock || "0");
+      formData.append("image", image);
+
+      const response = await fetch("/api/medicines", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data }),
+        body: formData,
       });
-      const { email, contact_number } = await res.json();
-      reset();
-      if (isClient) {
-        router.push(`add/success`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        reset();
+        setImage(null);
+        setImagePreviewUrl(null);
+        router.push(`/add/success`);
+      } else {
+        setError(result.message || "Error creating medicine");
       }
     } catch (error) {
-      console.error("Error al mandar los datos al BACK", error);
-      if (isClient) {
-        router.push("add/error");
-      }
+      console.error("Error submitting form:", error);
+      setError("An unexpected error occurred");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (!isClient) {
-    return null; // or a loading spinner
-  }
-
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImage(file);
+      setImagePreviewUrl(URL.createObjectURL(file));
+    }
+  };
   return (
     <div className="flex flex-col items-center justify-center">
       <Card className="mx-auto max-w-sm">
@@ -107,7 +102,7 @@ function Dashboard() {
             <CardTitle className="text-xl">Añade una medicina</CardTitle>
             <CardDescription>
               Rellena los campos para añadir una medicina disponible a la lista
-              de coches en venta, hay algunos campos que son opcionales
+              de medicinas en venta
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -116,10 +111,7 @@ function Dashboard() {
                 <Label>Categoria</Label>
                 <select
                   {...register("make", {
-                    required: {
-                      value: true,
-                      message: "Coloque la categoria de la medicina",
-                    },
+                    required: "Seleccione una categoría",
                   })}
                 >
                   {popularMakes.map((make) => (
@@ -138,12 +130,7 @@ function Dashboard() {
               <div className="grid gap-2">
                 <Label>Nombre</Label>
                 <Input
-                  {...register("name", {
-                    required: {
-                      value: true,
-                      message: "Coloque el nombre de la medicina",
-                    },
-                  })}
+                  {...register("name", { required: "Nombre es requerido" })}
                   placeholder="Nombre"
                 />
                 {errors.name && (
@@ -152,102 +139,89 @@ function Dashboard() {
                   </span>
                 )}
               </div>
+
               <div className="grid gap-2">
-                <Label>Marca</Label>
+                <Label>Descripción</Label>
                 <Input
-                  {...register("make", {
-                    required: {
-                      value: true,
-                      message: "Coloque el link de la marca",
-                    },
-                  })}
-                  placeholder="Marca"
+                  {...register("description")}
+                  placeholder="Descripción (opcional)"
                 />
-                {errors.link && (
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Precio</Label>
+                <Input
+                  {...register("price", { required: "Precio es requerido" })}
+                  placeholder="Precio"
+                  type="number"
+                  step="0.01"
+                />
+                {errors.price && (
                   <span className="text-red-500">
-                    {errors.link.message as string}
+                    {errors.price.message as string}
                   </span>
                 )}
               </div>
+
               <div className="grid gap-2">
-                <Label>
-                  Fotos <span className="font-light">(al menos una)</span>
-                </Label>
+                <Label>Precio Super Farmacia</Label>
                 <Input
-                  type="file"
-                  placeholder="Imágenes"
-                  accept="image/png, image/jpeg, image/jpg"
-                  onChange={(e) => {
-                    if (!e.target.files || !e.target.files[0]) return;
-                    setDisplayImages((prev) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        return [...prev, e.target.files[0]];
-                      }
-                      return prev;
-                    });
-                  }}
+                  {...register("price2", { required: "Precio 2 es requerido" })}
+                  placeholder="Precio Super Farmacia"
+                  type="number"
+                  step="0.01"
                 />
-                <ul className="flex flex-col">
-                  {displayImages.map((image) => (
-                    <div
-                      key={image.name}
-                      className="flex justify-between gap-1 items-center mb-1"
-                    >
-                      <div>
-                        <li className="text-blue-600">{image.name}</li>
-                      </div>
-                      {imagesNames.find((img) => img.name === image.name) ? (
-                        <p className="flex text-green-700 min-w-fit">
-                          Imagen subida
-                        </p>
-                      ) : (
-                        <div className="flex gap-1">
-                          <Button
-                            variant={"ghost"}
-                            className="bg-green-400 hover:bg-green-500"
-                            onClick={async () => {
-                              setSubmittingImg(true);
-                              try {
-                                await handleImageSubmit(image);
-                              } catch (error) {
-                                console.error(
-                                  "Error al subir la imagen",
-                                  error
-                                );
-                              }
-                            }}
-                            disabled={submittingImg}
-                          >
-                            Subir
-                          </Button>
-                          <Button
-                            variant={"destructive"}
-                            className="bg-red-400 hover:bg-red-500"
-                            onClick={() => {
-                              setDisplayImages(
-                                displayImages.filter((img) => img !== image)
-                              );
-                            }}
-                            disabled={submittingImg}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </ul>
-                {imageError && (
-                  <div className="flex text-red-500">{imageError}</div>
+                {errors.price2 && (
+                  <span className="text-red-500">
+                    {errors.price2.message as string}
+                  </span>
                 )}
               </div>
 
-              <Button
-                type="submit"
-                className="w-full disabled:bg-gray-500"
-                disabled={submittingImg}
-              >
-                Enviar
+              <div className="grid gap-2">
+                <Label>Precio Farmacias del Ahorro</Label>
+                <Input
+                  {...register("price3", { required: "Precio 3 es requerido" })}
+                  placeholder="Precio Farmacia Renacimiento"
+                  type="number"
+                  step="0.01"
+                />
+                {errors.price3 && (
+                  <span className="text-red-500">
+                    {errors.price3.message as string}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Stock</Label>
+                <Input
+                  {...register("stock")}
+                  placeholder="Stock (opcional)"
+                  type="number"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Foto</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {imagePreviewUrl && (
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Preview"
+                    className="mt-2 max-w-full h-auto"
+                  />
+                )}
+              </div>
+
+              {error && <div className="text-red-500">{error}</div>}
+
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting ? "Enviando..." : "Enviar"}
               </Button>
             </div>
           </CardContent>
