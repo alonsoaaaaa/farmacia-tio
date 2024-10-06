@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { link } from "fs";
 import { PrismaClient } from "@prisma/client";
-import { FetchAvailableMedicines } from "@/app/dashboard/actions";
 export default function Home() {
   let sections = ["Diabetes", "Colesterol", "Presion"];
   const [selectedSection, setSelectedSection] = useState("");
