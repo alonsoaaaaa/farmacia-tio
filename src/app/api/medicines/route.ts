@@ -80,8 +80,3 @@ export async function GET() {
   const medicines = await prisma.medicine.findMany();
   return NextResponse.json({ medicines });
 }
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
